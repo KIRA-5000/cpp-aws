@@ -5,6 +5,9 @@
 #include <aws/s3/S3Client.h>
 #include <aws/core/auth/AWSCredentialsProvider.h>
 
+#include <fstream>
+#include <iostream>
+
 auto InitializeClient(const Aws::String& accessKey, const Aws::String& secretKey)
 {
   Aws::Client::ClientConfiguration clientConfig;

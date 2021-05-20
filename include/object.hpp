@@ -171,14 +171,24 @@ auto DownloadObject(const std::string& accessKey, const std::string& secretKey, 
     );
 
     Aws::S3::Model::GetObjectRequest request;
-    request.SetBucket(Aws::String(bucketName.c_str(), bucketName.size()));
-    request.SetKey(Aws::String(objectName.c_str(), objectName.size()));
+    request.WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+    request.WithKey(Aws::String(objectName.c_str(), objectName.size()));
 
     auto outcome =  client.GetObject(request);
 
     if (outcome.IsSuccess())
     {
       auto& retrieved_file = outcome.GetResultWithOwnership().GetBody();
+
+      Aws::OFStream localFile;
+
+      localFile.open(dest + objectName, std::ios::out | std::ios::binary);
+      localFile << outcome.GetResult().GetBody().rdbuf();
+
+      localFile.close();
+
+      std::cout << "File Download Complete\n";
+      std::cout << "File Name: " << dest + objectName << "\n";
     }
     else
     {

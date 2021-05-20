@@ -6,12 +6,12 @@
 #include <string>
 #include <iostream>
 
+DEFINE_string(destination, "", "Destination");
 DEFINE_string(akey, "", "Access Key");
 DEFINE_string(skey, "", "Secret Key");
 DEFINE_string(op, "", "CreateBucket/UploadObject");
 DEFINE_string(bucket, "", "Bucket Name");
 DEFINE_string(object, "", "Object Name");
-DEFINE_string(dest, "", "Destination");
 
 int main(int argc, char *argv[])
 {
@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
   {
     flag = DeleteObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
   }
-   else if(FLAGS_op == "DownloadObject")
+  else if(FLAGS_op == "DownloadObject")
   {
-    flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_dest);
+    flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_destination);
   }
 
   return flag;
