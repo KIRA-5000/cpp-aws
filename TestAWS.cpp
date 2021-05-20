@@ -11,6 +11,7 @@ DEFINE_string(skey, "", "Secret Key");
 DEFINE_string(op, "", "CreateBucket/UploadObject");
 DEFINE_string(bucket, "", "Bucket Name");
 DEFINE_string(object, "", "Object Name");
+DEFINE_string(dest, "", "Destination");
 
 int main(int argc, char *argv[])
 {
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
   }
    else if(FLAGS_op == "DownloadObject")
   {
-    flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
+    flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_dest);
   }
 
   return flag;
