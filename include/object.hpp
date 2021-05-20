@@ -158,7 +158,7 @@ end:
   return flag; 
 }
 
-auto DownloadObject(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
+auto DownloadObject(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName, const std::string& dest)
 {
   auto flag = false;
   Aws::SDKOptions options;
