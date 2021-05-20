@@ -4,6 +4,7 @@
 #include <util.hpp>
 
 #include <aws/s3/model/Object.h>
+#include <aws/s3/model/GetObjectRequest.h>
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/ListObjectsRequest.h>
 #include <aws/s3/model/DeleteObjectRequest.h>
@@ -146,6 +147,7 @@ auto DeleteObject(const std::string& accessKey, const std::string& secretKey, co
     }
     else
     {
+      std::cout << "Object '" << objectName << "' deleted successfully from bucket '" << bucketName << "'\n";
       flag = true;
     }
   }
@@ -163,32 +165,26 @@ auto DownloadObject(const std::string& accessKey, const std::string& secretKey, 
 
   Aws::InitAPI(options);
   {
-    auto client = InitializeCredentials(
+    auto client = InitializeClient(
       Aws::String(accessKey.c_str(), accessKey.size()),
       Aws::String(secretKey.c_str(), secretKey.size())
     );
 
-    Aws::S3::Model::GetObjectRequest object_request;
-    object_request.SetBucket(bucketName);
-    object_request.SetKey(objectName);
+    Aws::S3::Model::GetObjectRequest request;
+    request.SetBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+    request.SetKey(Aws::String(objectName.c_str(), objectName.size()));
 
-    auto get_object_outcome =  client.GetObject(object_request);
+    auto outcome =  client.GetObject(request);
 
-     if (get_object_outcome.IsSuccess())
+    if (outcome.IsSuccess())
     {
-        auto& retrieved_file = get_object_outcome.GetResultWithOwnership().GetBody();
-
-      else if
-    {
-        auto err = get_object_outcome.GetError();
-        std::cout << "Error: GetObject: " <<
-        err.GetExceptionName() << ": " << err.GetMessage() << std::endl;
-        goto end;
+      auto& retrieved_file = outcome.GetResultWithOwnership().GetBody();
     }
-
-     else
+    else
     {
-      flag = true;
+      auto err = outcome.GetError();
+      std::cout << "Error: GetObject: " << err.GetExceptionName() << ": " << err.GetMessage() << "\n";
+      goto end;
     }
   }
 
