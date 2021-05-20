@@ -36,6 +36,10 @@ int main(int argc, char *argv[])
   {
     flag = DeleteObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
   }
+   else if(FLAGS_op == "DownloadObject")
+  {
+    flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
+  }
 
   return flag;
 }

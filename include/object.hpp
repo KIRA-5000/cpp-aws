@@ -156,4 +156,46 @@ end:
   return flag; 
 }
 
+auto DownloadObject(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
+{
+  auto flag = false;
+  Aws::SDKOptions options;
+
+  Aws::InitAPI(options);
+  {
+    auto client = InitializeCredentials(
+      Aws::String(accessKey.c_str(), accessKey.size()),
+      Aws::String(secretKey.c_str(), secretKey.size())
+    );
+
+    Aws::S3::Model::GetObjectRequest object_request;
+    object_request.SetBucket(bucketName);
+    object_request.SetKey(objectName);
+
+    auto get_object_outcome =  client.GetObject(object_request);
+
+     if (get_object_outcome.IsSuccess())
+    {
+        auto& retrieved_file = get_object_outcome.GetResultWithOwnership().GetBody();
+
+      else if
+    {
+        auto err = get_object_outcome.GetError();
+        std::cout << "Error: GetObject: " <<
+        err.GetExceptionName() << ": " << err.GetMessage() << std::endl;
+        goto end;
+    }
+
+     else
+    {
+      flag = true;
+    }
+  }
+
+end:
+
+  Aws::ShutdownAPI(options);
+  return flag; 
+}
+
 #endif
