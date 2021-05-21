@@ -1,0 +1,3 @@
+D:/cpp-aws/build/CMakeFiles/TestAWS.dir
+D:/cpp-aws/build/CMakeFiles/ALL_BUILD.dir
+D:/cpp-aws/build/CMakeFiles/ZERO_CHECK.dir

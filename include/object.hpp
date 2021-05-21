@@ -8,6 +8,7 @@
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/ListObjectsRequest.h>
 #include <aws/s3/model/DeleteObjectRequest.h>
+#include <aws/s3/model/CreateMultipartUploadRequest.h>
 
 #include <string>
 #include <fstream>
@@ -202,6 +203,27 @@ end:
 
   Aws::ShutdownAPI(options);
   return flag; 
+}
+
+auto MultipartUpload(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
+{
+   Aws::SDKOptions options;
+   Aws::InitAPI(options);
+  {
+    auto client = InitializeClient(
+      Aws::String(accessKey.c_str(), accessKey.size()),
+      Aws::String(secretKey.c_str(), secretKey.size())
+    );
+
+    Aws::S3::Model::CreateMultipartUploadRequest create_request;
+    create_request.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str())),
+    create_request.WithContentType(Aws::String(contentType.c_str(), contentType.size()));
+
+    auto createMultipartUploadOutcome = client.CreateMultipartUpload(create_request);
+
+    auto& upload_id = createMultipartUploadOutcome.GetResult().GetUploadId();
+    std::cout << "multiplarts upload id is:" << upload_id << std::endl;
+  }
 }
 
 #endif

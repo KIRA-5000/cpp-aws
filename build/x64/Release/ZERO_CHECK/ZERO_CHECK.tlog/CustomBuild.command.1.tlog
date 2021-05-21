@@ -1,0 +1,10 @@
+^D:\CPP-AWS\BUILD\CMAKEFILES\3357B73483DE35C1E4C47FF0F261234E\GENERATE.STAMP.RULE
+setlocal
+D:\Download\cmake-3.19.3-win64-x64\cmake-3.19.3-win64-x64\bin\cmake.exe -SD:/cpp-aws -BD:/cpp-aws/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/cpp-aws/build/cpp-aws.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

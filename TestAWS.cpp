@@ -42,5 +42,10 @@ int main(int argc, char *argv[])
     flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_destination);
   }
 
+  else if(FLAGS_op == "MultipartUpload")
+  {
+    flag = MultipartUpload(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
+  }
+
   return flag;
 }
