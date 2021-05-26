@@ -6,8 +6,11 @@
 #include <aws/s3/model/Object.h>
 #include <aws/s3/model/GetObjectRequest.h>
 #include <aws/s3/model/PutObjectRequest.h>
+#include <aws/s3/model/UploadPartRequest.h>
 #include <aws/s3/model/ListObjectsRequest.h>
 #include <aws/s3/model/DeleteObjectRequest.h>
+#include <aws/s3/model/CreateMultipartUploadRequest.h>
+#include <aws/s3/model/CompleteMultipartUploadRequest.h>
 
 #include <string>
 #include <fstream>
@@ -45,7 +48,7 @@ auto UploadObject(const std::string& accessKey, const std::string& secretKey, co
     request.SetBucket(Aws::String(bucketName.c_str(), bucketName.size()));
     request.SetKey(Aws::String(objectName.c_str(), objectName.size()));
 
-    std::shared_ptr<Aws::IOStream> input_data = Aws::MakeShared<Aws::FStream>(
+    auto input_data = Aws::MakeShared<Aws::FStream>(
       "SampleAllocationTag", 
       objectName.c_str(), 
       std::ios_base::in | std::ios_base::binary
@@ -202,6 +205,79 @@ end:
 
   Aws::ShutdownAPI(options);
   return flag; 
+}
+
+auto MultipartUpload(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
+{
+  Aws::SDKOptions options;
+
+  Aws::InitAPI(options);
+  {
+    auto client = InitializeClient(
+      Aws::String(accessKey.c_str(), accessKey.size()),
+      Aws::String(secretKey.c_str(), secretKey.size())
+    );
+
+    Aws::S3::Model::CreateMultipartUploadRequest init_request;
+    init_request.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+    init_request.SetContentType("text/plain");
+
+    auto createMultipartUploadOutcome = client.CreateMultipartUpload(init_request);
+    auto upload_id = createMultipartUploadOutcome.GetResult().GetUploadId();
+
+    std::cout << "multiplarts upload id is:" << upload_id << "\n";
+
+    Aws::S3::Model::UploadPartRequest my_request;
+    my_request.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+    my_request.SetPartNumber(1);
+    my_request.SetUploadId(Aws::String(upload_id.c_str(), upload_id.size()));
+
+    std::cout << "Part 1 upload is successful\n";
+
+    Aws::StringStream ss;
+    ss << "to upload";
+
+    std::shared_ptr<Aws::StringStream> stream_ptr = Aws::MakeShared<Aws::StringStream>("WriteStream::Upload" /* log id */, ss.str());
+
+    my_request.SetBody(stream_ptr);
+
+    auto uploadPartOutcomeCallable1 = client.UploadPartCallable(my_request);
+    auto outcome = uploadPartOutcomeCallable1.get();
+    auto etag = outcome.GetResult().GetETag();
+
+    std::cout << "ETag value is:" << etag << std::endl;
+
+    Aws::S3::Model::CompletedPart completedPart1;
+    completedPart1.SetPartNumber(1);
+    completedPart1.SetETag(etag);
+
+    Aws::S3::Model::CompleteMultipartUploadRequest completeMultipartUploadRequest;
+    completeMultipartUploadRequest.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+    completeMultipartUploadRequest.SetUploadId(Aws::String(upload_id.c_str(), upload_id.size()));
+
+    Aws::S3::Model::CompletedMultipartUpload completedMultipartUpload;
+    completedMultipartUpload.AddParts(completedPart1);
+    
+    completeMultipartUploadRequest.WithMultipartUpload(completedMultipartUpload);
+
+    auto completeMultipartUploadOutcome = client.CompleteMultipartUpload(completeMultipartUploadRequest);
+
+    if (!completeMultipartUploadOutcome.IsSuccess()) 
+    {
+      auto error = completeMultipartUploadOutcome.GetError();
+      std::stringstream ss;
+      ss << error << error.GetExceptionName() << ": " << error.GetMessage() << "\n";
+
+      std::cout << ss.str() << "\n";
+    }
+    else
+    {
+      std::cout << "Multipart Upload is Sucessful\n";
+    }
+  }
+    
+  Aws::ShutdownAPI(options);
+  return false;
 }
 
 #endif

@@ -25,6 +25,10 @@ int main(int argc, char *argv[])
   {
     flag = CreateBucket(FLAGS_akey, FLAGS_skey, FLAGS_bucket);
   }
+  else if (FLAGS_op == "DeleteBucket")
+  {
+    flag = DeleteBucket(FLAGS_akey, FLAGS_skey, FLAGS_bucket);
+  }
   else if (FLAGS_op == "UploadObject")
   {
     flag = UploadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
@@ -40,6 +44,10 @@ int main(int argc, char *argv[])
   else if(FLAGS_op == "DownloadObject")
   {
     flag = DownloadObject(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_destination);
+  }
+  else if (FLAGS_op == "MultipartUpload")
+  {
+    flag =  MultipartUpload(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
   }
 
   return flag;
