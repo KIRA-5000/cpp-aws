@@ -15,6 +15,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 auto UploadObject(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
 {
@@ -209,6 +210,9 @@ end:
 
 auto MultipartUpload(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
 {
+  // std::filesystem::path path(object);
+  // std::string objectName = path.filename().string();
+
   Aws::SDKOptions options;
 
   Aws::InitAPI(options);
@@ -225,39 +229,59 @@ auto MultipartUpload(const std::string& accessKey, const std::string& secretKey,
     auto createMultipartUploadOutcome = client.CreateMultipartUpload(init_request);
     auto upload_id = createMultipartUploadOutcome.GetResult().GetUploadId();
 
-    std::cout << "multiplarts upload id is:" << upload_id << "\n";
+    std::cout << "multiparts upload id is:" << upload_id << "\n";
 
-    Aws::S3::Model::UploadPartRequest my_request;
-    my_request.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
-    my_request.SetPartNumber(1);
-    my_request.SetUploadId(Aws::String(upload_id.c_str(), upload_id.size()));
+    Aws::S3::Model::CompletedMultipartUpload completedMultipartUpload;
 
-    std::cout << "Part 1 upload is successful\n";
+    for (int i = 1; i <= 10000; i++)
+    {
+      std::string partPath;
 
-    Aws::StringStream ss;
-    ss << "to upload";
+      std::cout << "Enter Part " << i << " of " << objectName << "\n";
+      std::cin >> partPath;
 
-    std::shared_ptr<Aws::StringStream> stream_ptr = Aws::MakeShared<Aws::StringStream>("WriteStream::Upload" /* log id */, ss.str());
+      Aws::S3::Model::UploadPartRequest my_request;
+      my_request.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+      my_request.SetPartNumber(i);
+      my_request.SetUploadId(Aws::String(upload_id.c_str(), upload_id.size()));
 
-    my_request.SetBody(stream_ptr);
+      std::cout << partPath << " upload is successful\n";
 
-    auto uploadPartOutcomeCallable1 = client.UploadPartCallable(my_request);
-    auto outcome = uploadPartOutcomeCallable1.get();
-    auto etag = outcome.GetResult().GetETag();
+      auto content = ReadFromFile(partPath);
 
-    std::cout << "ETag value is:" << etag << std::endl;
+      Aws::StringStream ss;
+      ss << content;
 
-    Aws::S3::Model::CompletedPart completedPart1;
-    completedPart1.SetPartNumber(1);
-    completedPart1.SetETag(etag);
+      std::shared_ptr<Aws::StringStream> stream_ptr = Aws::MakeShared<Aws::StringStream>("WriteStream::Upload" /* log id */, ss.str());
+
+      my_request.SetBody(stream_ptr);
+
+      auto uploadPartOutcomeCallable1 = client.UploadPartCallable(my_request);
+      auto outcome = uploadPartOutcomeCallable1.get();
+      auto etag = outcome.GetResult().GetETag();
+
+      std::cout << "ETag value is: " << etag << " for file: " << partPath << "\n";
+
+      Aws::S3::Model::CompletedPart completedPart;
+      completedPart.SetPartNumber(i);
+      completedPart.SetETag(etag);
+
+      completedMultipartUpload.AddParts(completedPart);
+
+      char choice;
+
+      std::cout << "Do you have more parts to enter?\n";
+      std::cin >> choice;
+
+      if (choice != 'y')
+      {
+        break;
+      }
+    }
 
     Aws::S3::Model::CompleteMultipartUploadRequest completeMultipartUploadRequest;
     completeMultipartUploadRequest.WithKey(Aws::String(objectName.c_str(), objectName.size())).WithBucket(Aws::String(bucketName.c_str(), bucketName.size()));
     completeMultipartUploadRequest.SetUploadId(Aws::String(upload_id.c_str(), upload_id.size()));
-
-    Aws::S3::Model::CompletedMultipartUpload completedMultipartUpload;
-    completedMultipartUpload.AddParts(completedPart1);
-    
     completeMultipartUploadRequest.WithMultipartUpload(completedMultipartUpload);
 
     auto completeMultipartUploadOutcome = client.CompleteMultipartUpload(completeMultipartUploadRequest);
