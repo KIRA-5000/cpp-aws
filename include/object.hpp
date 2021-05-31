@@ -50,7 +50,7 @@ auto UploadObject(const std::string& accessKey, const std::string& secretKey, co
     request.SetKey(Aws::String(objectName.c_str(), objectName.size()));
     request.SetBody(stream_ptr);
     request.SetObjectLockMode(Aws::S3::Model::ObjectLockMode::GOVERNANCE);
-    request.SetRetentionPersio
+     request.SetObjectLockRetainUntilDate(Aws::Utils::DateTime::Now() + std::chrono::hours(1));
     auto outcome = client.PutObject(request);
 
     if (outcome.IsSuccess()) 

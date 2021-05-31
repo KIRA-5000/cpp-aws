@@ -31,6 +31,7 @@ auto CreateBucket(const std::string& accessKey, const std::string& secretKey, co
 
     Aws::S3::Model::CreateBucketRequest request;
     request.SetBucket(Aws::String(bucketName.c_str(), bucketName.size()));
+    request.SetObjectLockEnabledForBucket(true);
 
     auto outcome = client.CreateBucket(request);
 
