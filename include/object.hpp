@@ -17,8 +17,11 @@
 #include <iostream>
 #include <filesystem>
 
-auto UploadObject(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
+auto UploadObject(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& object)
 {
+  std::filesystem::path path(object);
+  std::string objectName = path.filename().string();
+
   auto flag = false;
   Aws::SDKOptions options;
 
@@ -35,28 +38,19 @@ auto UploadObject(const std::string& accessKey, const std::string& secretKey, co
       Aws::String(secretKey.c_str(), secretKey.size())
     );
 
-    struct stat buffer;
+    auto content = ReadFromFile(object);
 
-    if (stat(objectName.c_str(), &buffer) == -1)
-    {
-      std::cout << "Error: PutObject: File '" << objectName << "' does not exist.\n";
-      goto end;
-    }
+    Aws::StringStream ss;
+    ss << content;
 
-    std::cout << "Object: " << objectName << " verified.\n";
+    std::shared_ptr<Aws::StringStream> stream_ptr = Aws::MakeShared<Aws::StringStream>("WriteStream::Upload" /* log id */, ss.str());
 
     Aws::S3::Model::PutObjectRequest request;
     request.SetBucket(Aws::String(bucketName.c_str(), bucketName.size()));
     request.SetKey(Aws::String(objectName.c_str(), objectName.size()));
-
-    auto input_data = Aws::MakeShared<Aws::FStream>(
-      "SampleAllocationTag", 
-      objectName.c_str(), 
-      std::ios_base::in | std::ios_base::binary
-    );
-
-    request.SetBody(input_data);
-
+    request.SetBody(stream_ptr);
+    request.SetObjectLockMode(Aws::S3::Model::ObjectLockMode::GOVERNANCE);
+    request.SetRetentionPersio
     auto outcome = client.PutObject(request);
 
     if (outcome.IsSuccess()) 
@@ -210,9 +204,6 @@ end:
 
 auto MultipartUpload(const std::string& accessKey, const std::string& secretKey, const std::string& bucketName, const std::string& objectName)
 {
-  // std::filesystem::path path(object);
-  // std::string objectName = path.filename().string();
-
   Aws::SDKOptions options;
 
   Aws::InitAPI(options);
