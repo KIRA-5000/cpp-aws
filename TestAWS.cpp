@@ -1,5 +1,6 @@
 #include <object.hpp>
 #include <bucket.hpp>
+#include <settings.hpp>
 
 #include <gflags/gflags.h>
 
@@ -12,6 +13,8 @@ DEFINE_string(skey, "", "Secret Key");
 DEFINE_string(op, "", "CreateBucket/UploadObject");
 DEFINE_string(bucket, "", "Bucket Name");
 DEFINE_string(object, "", "Object Name");
+DEFINE_bool(choice, false, "");
+DEFINE_int32(duration, 0, "");
 
 int main(int argc, char *argv[])
 {
@@ -48,6 +51,10 @@ int main(int argc, char *argv[])
   else if (FLAGS_op == "MultipartUpload")
   {
     flag =  MultipartUpload(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object);
+  }
+  else if (FLAGS_op == "SetLifeCycle")
+  {
+    flag = LifeCycle(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_choice, "", "", FLAGS_duration);
   }
 
   return flag;
