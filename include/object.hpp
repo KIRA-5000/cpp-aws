@@ -4,6 +4,7 @@
 #include <util.hpp>
 
 #include <aws/s3/model/Object.h>
+#include <aws/core/utils/HashingUtils.h>
 #include <aws/s3/model/GetObjectRequest.h>
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/UploadPartRequest.h>
@@ -51,6 +52,14 @@ auto UploadObject(const std::string& accessKey, const std::string& secretKey, co
     request.SetBody(stream_ptr);
     request.SetObjectLockMode(Aws::S3::Model::ObjectLockMode::GOVERNANCE);
     request.SetObjectLockRetainUntilDate(Aws::Utils::DateTime::Now() + std::chrono::hours(1));
+
+    Aws::Utils::ByteBuffer part_md5(Aws::Utils::HashingUtils::CalculateMD5(*stream_ptr));
+    request.SetContentMD5(Aws::Utils::HashingUtils::Base64Encode(part_md5));
+
+    auto start_pos = stream_ptr->tellg();
+    stream_ptr->seekg(0LL, stream_ptr->end);
+    request.SetContentLength(static_cast<long>(stream_ptr->tellg()));
+    stream_ptr->seekg(start_pos);
     
     auto outcome = client.PutObject(request);
 
