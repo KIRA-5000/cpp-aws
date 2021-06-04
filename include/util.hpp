@@ -24,7 +24,7 @@ auto InitializeClient(const Aws::String& accessKey, const Aws::String& secretKey
   return Aws::S3::S3Client(credentials, clientConfig);
 }
 
-auto ReadFromFile(const std::string file)
+auto ReadFromFile(const std::string& file)
 {
   std::ifstream hFile(file);
   std::string str;
