@@ -1,3 +1,4 @@
+#include <user.hpp>
 #include <object.hpp>
 #include <bucket.hpp>
 #include <settings.hpp>
@@ -7,6 +8,7 @@
 #include <string>
 #include <iostream>
 
+DEFINE_string(user, "", "UserName");
 DEFINE_string(destination, "", "Destination");
 DEFINE_string(akey, "", "Access Key");
 DEFINE_string(skey, "", "Secret Key");
@@ -24,7 +26,19 @@ int main(int argc, char *argv[])
   gflags::SetUsageMessage("AWS API");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  if (FLAGS_op == "CreateBucket")
+  if (FLAGS_op == "CreateUser")
+  {
+    flag = CreateUser(FLAGS_akey, FLAGS_skey, FLAGS_user);
+  }
+  else if (FLAGS_op == "DeleteUser")
+  {
+    flag = DeleteUser(FLAGS_akey, FLAGS_skey, FLAGS_user);
+  }
+  else if (FLAGS_op == "ListUsers")
+  {
+    flag = ListUsers(FLAGS_akey, FLAGS_skey);
+  }
+  else if (FLAGS_op == "CreateBucket")
   {
     flag = CreateBucket(FLAGS_akey, FLAGS_skey, FLAGS_bucket);
   }
