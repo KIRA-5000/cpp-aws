@@ -2,6 +2,7 @@
 #define UTIL_HPP
 
 #include <aws/core/Aws.h>
+#include <aws/iam/IAMClient.h>
 #include <aws/s3/S3Client.h>
 #include <aws/core/auth/AWSCredentialsProvider.h>
 
@@ -22,6 +23,21 @@ auto InitializeClient(const Aws::String& accessKey, const Aws::String& secretKey
   credentials.SetAWSSecretKey(secretKey);
 
   return Aws::S3::S3Client(credentials, clientConfig);
+}
+
+auto InitializeIAMClient(const Aws::String& accessKey, const Aws::String& secretKey)
+{
+  Aws::Client::ClientConfiguration clientConfig;
+
+  clientConfig.proxyHost = Aws::String("127.0.0.1");
+  clientConfig.proxyPort = 5555;
+  
+  Aws::Auth::AWSCredentials credentials;
+
+  credentials.SetAWSAccessKeyId(accessKey);
+  credentials.SetAWSSecretKey(secretKey);
+
+  return Aws::IAM::IAMClient(credentials, clientConfig);
 }
 
 auto ReadFromFile(const std::string& file)
