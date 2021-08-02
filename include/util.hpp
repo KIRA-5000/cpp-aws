@@ -29,8 +29,8 @@ auto InitializeIAMClient(const Aws::String& accessKey, const Aws::String& secret
 {
   Aws::Client::ClientConfiguration clientConfig;
 
-  clientConfig.proxyHost = Aws::String("127.0.0.1");
-  clientConfig.proxyPort = 5555;
+  // clientConfig.proxyHost = Aws::String("127.0.0.1");
+  // clientConfig.proxyPort = 5555;
   
   Aws::Auth::AWSCredentials credentials;
 

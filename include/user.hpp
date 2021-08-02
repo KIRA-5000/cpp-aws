@@ -10,6 +10,9 @@
 #include <aws/iam/model/DeleteUserRequest.h>
 #include <aws/iam/model/ListUsersRequest.h>
 #include <aws/iam/model/ListUsersResult.h>
+#include <aws/iam/model/ListAccessKeysRequest.h>
+#include <aws/iam/model/ListAccessKeysResult.h>
+#include <aws/iam/model/DeleteAccessKeyRequest.h>
 
 auto CreateUser(const std::string& accessKey, const std::string& secretKey, const std::string& userName)
 {
@@ -73,6 +76,41 @@ auto DeleteUser(const std::string& accessKey, const std::string& secretKey, cons
       Aws::String(accessKey.c_str(), accessKey.size()), 
       Aws::String(secretKey.c_str(), secretKey.size())
     );
+
+    Aws::IAM::Model::ListAccessKeysRequest request_list;
+    request_list.SetUserName(Aws::String(userName.c_str(), userName.size()));
+
+    auto outcome_list = iam.ListAccessKeys(request_list);
+    if (!outcome_list.IsSuccess())
+    {
+      std::cout << "Failed to list access keys for user " << userName << ": " << outcome_list.GetError().GetMessage() << std::endl;
+      goto end;
+    }
+
+    const auto &keys = outcome_list.GetResult().GetAccessKeyMetadata();
+
+    for (const auto &key : keys)
+    {
+      auto statusString = Aws::IAM::Model::StatusTypeMapper::GetNameForStatusType(key.GetStatus());
+      std::cout << "Deleting Access ID: " << key.GetAccessKeyId() << std::endl;
+      std::cout << "Status: " << statusString << std::endl;
+
+      Aws::IAM::Model::DeleteAccessKeyRequest request_delete;
+      request_delete.SetUserName(Aws::String(userName.c_str(), userName.size()));
+      request_delete.SetAccessKeyId(key.GetAccessKeyId());
+
+      auto outcome_delete = iam.DeleteAccessKey(request_delete);
+
+      if (!outcome_delete.IsSuccess())
+      {
+        std::cout << "Error deleting access key " << key.GetAccessKeyId() << " from user " << userName << ": " << outcome_delete.GetError().GetMessage() << std::endl;
+        goto end;
+      }
+      else
+      {
+        std::cout << "Successfully deleted access key " << key.GetAccessKeyId() << " for IAM user " << userName << std::endl;
+      }
+    }
 
     Aws::IAM::Model::DeleteUserRequest request;
     request.SetUserName(Aws::String(userName.c_str(), userName.size()));
