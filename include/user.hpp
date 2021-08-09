@@ -13,8 +13,9 @@
 #include <aws/iam/model/ListAccessKeysRequest.h>
 #include <aws/iam/model/ListAccessKeysResult.h>
 #include <aws/iam/model/DeleteAccessKeyRequest.h>
+#include <aws/iam/model/UpdateUserRequest.h>
 
-auto CreateUser(const std::string& accessKey, const std::string& secretKey, const std::string& userName)
+auto CreateUser(const std::string& accessKey, const std::string& secretKey, const std::string& userName, const std::string& policyArn = "")
 {
   bool flag = false;
   Aws::SDKOptions options;
@@ -29,6 +30,7 @@ auto CreateUser(const std::string& accessKey, const std::string& secretKey, cons
 
     Aws::IAM::Model::CreateUserRequest create_request;
     create_request.SetUserName(Aws::String(userName.c_str(), userName.size()));
+    // create_request.SetPermissionsBoundary(Aws::String(policyArn.c_str(), policyArn.size()));
 
     auto create_outcome = iam.CreateUser(create_request);
     if (!create_outcome.IsSuccess())
@@ -168,6 +170,39 @@ auto ListUsers(const std::string& accessKey, const std::string& secretKey)
 
 end:
 
+  Aws::ShutdownAPI(options);
+
+  return ((flag) ? 0 : -1);
+}
+
+auto UpdateUser(const std::string& accessKey, const std::string& secretKey, const std::string& olduserName, const std::string& newuserName)
+{
+  bool flag = false;
+  Aws::SDKOptions options;
+
+  Aws::InitAPI(options);
+  {
+    auto iam = InitializeIAMClient(
+      Aws::String(accessKey.c_str(), accessKey.size()), 
+      Aws::String(secretKey.c_str(), secretKey.size())
+    );
+
+    Aws::IAM::Model::UpdateUserRequest update_request;
+    update_request.SetUserName(Aws::String(olduserName.c_str(), olduserName.size()));
+    update_request.SetUserName(Aws::String(newuserName.c_str(), newuserName.size()));
+
+    auto update_outcome = iam.UpdateUser(update_request);
+    if (update_outcome.IsSuccess())
+    {
+      std::cout << "IAM user " << olduserName <<" successfully updated with new user name " << newuserName << std::endl;
+      flag = true;
+    }
+    else
+    {
+      std::cout << "Error updating user name for IAM user " << olduserName << ":" << update_outcome.GetError().GetMessage() << std::endl;
+    }
+  }
+  
   Aws::ShutdownAPI(options);
 
   return ((flag) ? 0 : -1);

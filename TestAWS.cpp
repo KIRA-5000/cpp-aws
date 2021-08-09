@@ -1,4 +1,5 @@
 #include <user.hpp>
+#include <policy.hpp>
 #include <access.hpp>
 #include <object.hpp>
 #include <bucket.hpp>
@@ -16,6 +17,9 @@ DEFINE_string(skey, "", "Secret Key");
 DEFINE_string(op, "", "CreateBucket/UploadObject");
 DEFINE_string(bucket, "", "Bucket Name");
 DEFINE_string(object, "", "Object Name");
+DEFINE_string(policyPath, "", "Policy Path");
+DEFINE_string(policy, "", "Policy Name");
+DEFINE_string(policyArn, "", "PolicyArn");
 DEFINE_bool(choice, false, "");
 DEFINE_int32(duration, 0, "");
 
@@ -29,7 +33,7 @@ int main(int argc, char *argv[])
 
   if (FLAGS_op == "CreateUser")
   {
-    flag = CreateUser(FLAGS_akey, FLAGS_skey, FLAGS_user);
+    flag = CreateUser(FLAGS_akey, FLAGS_skey, FLAGS_user, FLAGS_policyArn);
   }
   else if (FLAGS_op == "DeleteUser")
   {
@@ -38,6 +42,18 @@ int main(int argc, char *argv[])
   else if (FLAGS_op == "ListUsers")
   {
     flag = ListUsers(FLAGS_akey, FLAGS_skey);
+  }
+  else if (FLAGS_op == "CreatePolicy")
+  {
+    flag = CreateUserPolicy(FLAGS_akey, FLAGS_skey, FLAGS_policy, FLAGS_policyPath);
+  }
+  else if (FLAGS_op == "RetrievePolicy")
+  {
+    flag = RetrievePolicy(FLAGS_akey, FLAGS_skey, FLAGS_policyArn);
+  }
+  else if (FLAGS_op == "ListPolicies")
+  {
+    flag = ListPolicies(FLAGS_akey, FLAGS_skey);
   }
   else if (FLAGS_op == "CreateBucket")
   {
