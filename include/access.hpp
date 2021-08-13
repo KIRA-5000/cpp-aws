@@ -7,6 +7,8 @@
 #include <aws/iam/model/CreateAccessKeyRequest.h>
 #include <aws/iam/model/CreateAccessKeyResult.h>
 #include <aws/iam/model/UpdateAccessKeyRequest.h>
+#include <aws/iam/model/ListAccessKeysRequest.h>
+#include <aws/iam/model/ListAccessKeysResult.h>
 
 auto CreateAccessKey(const std::string& accessKey, const std::string& secretKey, const std::string& userName)
 {
@@ -112,5 +114,58 @@ auto ChangeKeyStatus(const std::string& userName, const std::string& accessKey, 
 
   return ((flag) ? 0 : -1);
 }
+
+auto ListAccessKeys(const std::string& accessKey, const std::string& secretKey, const std::string& userName)
+{
+  bool flag = false;
+  Aws::SDKOptions options;
+  Aws::IAM::Model::AccessKey accessKeys;
+
+  Aws::InitAPI(options);
+  {
+    auto iam = InitializeIAMClient(
+    Aws::String(accessKey.c_str(), accessKey.size()), 
+    Aws::String(secretKey.c_str(), secretKey.size())
+    );
+
+    Aws::IAM::Model::ListAccessKeysRequest list_request;
+    list_request.SetUserName(Aws::String(userName.c_str(), userName.size()));
+
+    bool done = false;
+    bool header = false;
+    while (!done)
+    {
+      auto list_outcome = iam.ListAccessKeys(list_request);
+      if (!list_outcome.IsSuccess())
+      {
+        std::cout << "Failed to list access keys for user " << userName << ": " << list_outcome.GetError().GetMessage() << std::endl;
+        break;
+      }
+
+      const auto &keys = list_outcome.GetResult().GetAccessKeyMetadata();
+      for (const auto &key : keys)
+      {
+        Aws::String statusString = Aws::IAM::Model::StatusTypeMapper::GetNameForStatusType(key.GetStatus());
+        std::cout << "UserName: " << key.GetUserName() <<  std::endl;
+        std::cout << "AccessKey: " << key.GetAccessKeyId() << std::endl;
+      }
+
+      if (list_outcome.GetResult().GetIsTruncated())
+      {
+        list_request.SetMarker(list_outcome.GetResult().GetMarker());
+      }
+      else
+      {
+        done = true;
+      }
+
+    }
+  }
+
+  Aws::ShutdownAPI(options);
+
+  return ((flag) ? 0 : -1); 
+}
+
 
 #endif

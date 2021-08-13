@@ -55,6 +55,10 @@ int main(int argc, char *argv[])
   {
     flag = ListPolicies(FLAGS_akey, FLAGS_skey);
   }
+  else if (FLAGS_op == "DeletePolicy")
+  {
+    flag = DeletePolicy(FLAGS_akey, FLAGS_skey, FLAGS_policyArn);
+  }
   else if (FLAGS_op == "CreateBucket")
   {
     flag = CreateBucket(FLAGS_akey, FLAGS_skey, FLAGS_bucket);
@@ -86,6 +90,22 @@ int main(int argc, char *argv[])
   else if (FLAGS_op == "SetLifeCycle")
   {
     flag = LifeCycle(FLAGS_akey, FLAGS_skey, FLAGS_bucket, FLAGS_object, FLAGS_choice, "", "", FLAGS_duration);
+  }
+  else if (FLAGS_op == "ListAccessKeys")
+  {
+    flag = ListAccessKeys(FLAGS_akey, FLAGS_skey, FLAGS_user);
+  }
+  else if (FLAGS_op == "PutBucketPolicy")
+  {
+    flag = PutBucketPolicy(FLAGS_bucket, FLAGS_akey, FLAGS_skey, FLAGS_policyPath);
+  }
+  else if(FLAGS_op == "GetBucketPolicy")
+  {
+    flag = GetBucketPolicy(FLAGS_bucket, FLAGS_akey, FLAGS_skey);
+  }
+  else if (FLAGS_op == "DeleteBucketPolicy")
+  {
+    flag = DeleteBucketPolicy(FLAGS_bucket, FLAGS_akey, FLAGS_skey);
   }
 
   return flag;
